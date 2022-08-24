@@ -114,5 +114,7 @@ impl Processor {
                     .unwrap();
             }
         }
+
+        destination.flush();
     }
 }
