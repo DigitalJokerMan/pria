@@ -14,7 +14,12 @@ pub struct ProcessOutput {
 
 pub trait FileHandler {
     fn criteria(&self) -> HandlerCriteria;
-    fn process(&self, bytes: &[u8], source_path: &Path) -> Result<ProcessOutput, anyhow::Error>;
+    fn process(
+        &self,
+        bytes: Vec<u8>,
+        parameters_bytes: Option<Vec<u8>>,
+        source_path: &Path,
+    ) -> Result<ProcessOutput, anyhow::Error>;
 }
 
 pub struct CopyHandler;
@@ -24,9 +29,14 @@ impl FileHandler for CopyHandler {
         HandlerCriteria::EverythingElse
     }
 
-    fn process(&self, bytes: &[u8], _source_path: &Path) -> Result<ProcessOutput, anyhow::Error> {
+    fn process(
+        &self,
+        bytes: Vec<u8>,
+        _parameters_bytes: Option<Vec<u8>>,
+        _source_path: &Path,
+    ) -> Result<ProcessOutput, anyhow::Error> {
         Ok(ProcessOutput {
-            bytes: bytes.to_vec(),
+            bytes: bytes,
             preferred_extension: None,
         })
     }

@@ -4,6 +4,7 @@ pub mod image;
 
 use handler::{FileHandler, HandlerCriteria};
 use std::{
+    ffi::OsStr,
     fmt::Display,
     path::{Path, PathBuf},
 };
@@ -73,6 +74,7 @@ impl Processor {
             .into_iter()
             .filter_map(|x| x.ok())
             .filter(|x| x.metadata().unwrap().is_file())
+            .filter(|x| x.path().extension() != Some(OsStr::new("param")))
         {
             if let Some(handler) = entry
                 .path()
@@ -81,7 +83,13 @@ impl Processor {
                 .or_else(|| self.get_fallback_handler())
             {
                 let bytes = std::fs::read(entry.path()).unwrap();
-                let output = handler.process(&bytes, entry.path()).unwrap();
+                let parameters_bytes =
+                    std::fs::read(format!("{}.param", entry.path().display())).ok();
+
+                let output = handler
+                    .process(bytes, parameters_bytes, entry.path())
+                    .unwrap();
+
                 let mut path = PathBuf::new();
                 path.push(&destination_path);
                 path.push(
