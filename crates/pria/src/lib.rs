@@ -1,16 +1,16 @@
 pub mod handler;
 #[cfg(feature = "image")]
 pub mod image;
-pub mod writer;
+pub mod packager;
 
 use handler::{FileHandler, HandlerCriteria};
+use packager::Packager;
 use std::{
     ffi::OsStr,
     fmt::Display,
     path::{Path, PathBuf},
 };
 use walkdir::WalkDir;
-use writer::Writer;
 
 #[derive(Default)]
 pub struct Processor {
@@ -73,7 +73,7 @@ impl Processor {
 
     pub fn process_folder_recursively<W>(&self, source_path: &Path, mut destination: W)
     where
-        W: Writer,
+        W: Packager,
     {
         for entry in WalkDir::new(source_path)
             .into_iter()

@@ -1,6 +1,6 @@
 use std::env;
 
-use pria::{handler::CopyHandler, image::ImageHandler, writer::FSWriter, Processor};
+use pria::{handler::CopyHandler, image::ImageHandler, packager::FSPackager, Processor};
 
 fn main() {
     const SRC_PATH: &str = "assets_src";
@@ -14,6 +14,6 @@ fn main() {
         .unwrap();
     processor.process_folder_recursively(
         SRC_PATH.as_ref(),
-        FSWriter::new(env::var("OUT_DIR").unwrap().as_ref()),
+        FSPackager::new(env::var("OUT_DIR").unwrap().as_ref()),
     );
 }
