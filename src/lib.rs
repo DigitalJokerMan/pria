@@ -1,14 +1,7 @@
+pub mod handler;
+
+use handler::{FileHandler, HandlerCriteria};
 use std::fmt::Display;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum HandlerCriteria {
-    EverythingElse,
-    Extensions(&'static [&'static str]),
-}
-
-pub trait FileHandler {
-    fn criteria(&self) -> HandlerCriteria;
-}
 
 #[derive(Default)]
 pub struct Processor {
