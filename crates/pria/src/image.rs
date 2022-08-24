@@ -2,7 +2,7 @@ use image::ImageOutputFormat;
 use serde::{Deserialize, Serialize};
 use std::{io::Cursor, path::Path};
 
-use crate::handler::{FileHandler, HandlerCriteria, ProcessOutput};
+use crate::processor::{ProcessOutput, Processor, ProcessorCriteria};
 
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
 pub enum OutputType {
@@ -27,9 +27,9 @@ pub struct ImageHandler {
     pub default_parameters: ImageHandlerParameters,
 }
 
-impl FileHandler for ImageHandler {
-    fn criteria(&self) -> HandlerCriteria {
-        HandlerCriteria::Extensions(&["png", "jpg"]) // TODO: Don't hard-code this, bound it by features.
+impl Processor for ImageHandler {
+    fn criteria(&self) -> ProcessorCriteria {
+        ProcessorCriteria::Extensions(&["png", "jpg"]) // TODO: Don't hard-code this, bound it by features.
     }
 
     fn process(

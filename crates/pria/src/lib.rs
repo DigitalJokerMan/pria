@@ -1,51 +1,38 @@
-pub mod handler;
 #[cfg(feature = "image")]
 pub mod image;
 pub mod packager;
+pub mod processor;
 
-use handler::{FileHandler, HandlerCriteria};
 use packager::Packager;
+use processor::{Processor, ProcessorCriteria, ProcessorCriteriaConflict};
 use std::{
     ffi::OsStr,
-    fmt::Display,
     path::{Path, PathBuf},
 };
 use walkdir::WalkDir;
 
 #[derive(Default)]
-pub struct Processor {
-    file_handlers: Vec<Box<dyn FileHandler>>,
-}
-
-#[derive(Debug, Clone)]
-pub struct HandlerCriteriaConflict {
-    new: HandlerCriteria,
-    existing: HandlerCriteria,
-}
-
-impl Display for HandlerCriteriaConflict {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "cannot insert handler: its criteria ({:?}) conflicts with an already existing criteria ({:?})", self.new, self.existing)
-    }
+pub struct Factory {
+    file_handlers: Vec<Box<dyn Processor>>,
 }
 
 #[allow(clippy::borrowed_box)]
-impl Processor {
+impl Factory {
     pub fn new() -> Self {
         Self {
             file_handlers: Vec::new(),
         }
     }
 
-    pub fn get_fallback_handler(&self) -> Option<&Box<dyn FileHandler>> {
+    pub fn get_fallback_handler(&self) -> Option<&Box<dyn Processor>> {
         self.file_handlers
             .iter()
-            .find(|handler| handler.criteria() == HandlerCriteria::EverythingElse)
+            .find(|handler| handler.criteria() == ProcessorCriteria::EverythingElse)
     }
 
-    pub fn get_handler_for_extension(&self, extension: &str) -> Option<&Box<dyn FileHandler>> {
+    pub fn get_handler_for_extension(&self, extension: &str) -> Option<&Box<dyn Processor>> {
         self.file_handlers.iter().find(|handler| {
-            if let HandlerCriteria::Extensions(extensions) = handler.criteria() {
+            if let ProcessorCriteria::Extensions(extensions) = handler.criteria() {
                 extensions.contains(&extension)
             } else {
                 false
@@ -55,13 +42,13 @@ impl Processor {
 
     pub fn add_file_handler(
         &mut self,
-        file_handler: Box<dyn FileHandler>,
-    ) -> Result<(), HandlerCriteriaConflict> {
-        if file_handler.criteria() == HandlerCriteria::EverythingElse
+        file_handler: Box<dyn Processor>,
+    ) -> Result<(), ProcessorCriteriaConflict> {
+        if file_handler.criteria() == ProcessorCriteria::EverythingElse
             && self.get_fallback_handler().is_some()
         // Can't use "let Some(fallback_handler) = self.get_fallback_handler()" as that's considered unstable.
         {
-            Err(HandlerCriteriaConflict {
+            Err(ProcessorCriteriaConflict {
                 new: file_handler.criteria(),
                 existing: self.get_fallback_handler().unwrap().criteria(),
             })
