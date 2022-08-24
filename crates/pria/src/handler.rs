@@ -30,3 +30,4 @@ impl FileHandler for CopyHandler {
             preferred_extension: None,
         })
     }
+}
