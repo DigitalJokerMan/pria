@@ -71,7 +71,7 @@ impl Processor {
         }
     }
 
-    pub fn process_folder_recursively<W>(&self, source_path: &Path, destination: &mut W)
+    pub fn process_folder_recursively<W>(&self, source_path: &Path, mut destination: W)
     where
         W: Writer,
     {

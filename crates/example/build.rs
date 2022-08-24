@@ -14,6 +14,6 @@ fn main() {
         .unwrap();
     processor.process_folder_recursively(
         SRC_PATH.as_ref(),
-        &mut FSWriter::new(env::var("OUT_DIR").unwrap().as_ref()),
+        FSWriter::new(env::var("OUT_DIR").unwrap().as_ref()),
     );
 }

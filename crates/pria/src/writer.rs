@@ -2,7 +2,11 @@ use std::path::{Path, PathBuf};
 
 pub trait Writer {
     fn write_file(&mut self, path: &Path, bytes: Vec<u8>) -> Result<(), anyhow::Error>;
-    fn flush(&mut self) {}
+    fn flush(self)
+    where
+        Self: Sized,
+    {
+    }
 }
 
 pub struct FSWriter {
