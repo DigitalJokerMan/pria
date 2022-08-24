@@ -19,7 +19,7 @@ impl Default for OutputType {
 
 #[derive(Serialize, Deserialize, Default, Clone, Copy)]
 pub struct ImageHandlerParameters {
-    output: OutputType,
+    pub output: OutputType,
 }
 
 #[derive(Default)]
