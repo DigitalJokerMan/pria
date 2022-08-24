@@ -1,7 +1,11 @@
 pub mod handler;
 
 use handler::{FileHandler, HandlerCriteria};
-use std::fmt::Display;
+use std::{
+    fmt::Display,
+    path::{Path, PathBuf},
+};
+use walkdir::WalkDir;
 
 #[derive(Default)]
 pub struct Processor {
@@ -59,6 +63,44 @@ impl Processor {
         } else {
             self.file_handlers.push(file_handler);
             Ok(())
+        }
+    }
+
+    pub fn process_folder_recursively(&self, source_path: &Path, destination_path: &Path) {
+        for entry in WalkDir::new(source_path)
+            .into_iter()
+            .filter_map(|x| x.ok())
+            .filter(|x| x.metadata().unwrap().is_file())
+        {
+            if let Some(handler) = entry
+                .path()
+                .extension()
+                .and_then(|ext| self.get_handler_for_extension(ext.to_str().unwrap()))
+                .or_else(|| self.get_fallback_handler())
+            {
+                let bytes = std::fs::read(entry.path()).unwrap();
+                let output = handler.process(&bytes, entry.path()).unwrap();
+                let mut path = PathBuf::new();
+                path.push(&destination_path);
+                path.push(
+                    &entry
+                        .path()
+                        .display()
+                        .to_string()
+                        .strip_prefix(&source_path.display().to_string())
+                        .unwrap()[1..], // Trim the first character because it'll be '\' or '/'(?)
+                );
+
+                if let Some(preferred_extension) = output.preferred_extension {
+                    path.set_extension(preferred_extension);
+                }
+
+                if let Some(parent) = path.parent() {
+                    std::fs::create_dir_all(parent).unwrap();
+                }
+
+                std::fs::write(path, output.bytes).unwrap();
+            }
         }
     }
 }
