@@ -5,6 +5,13 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+image = ["dep:image", "dep:qoi"]
+default = ["image"]
+
 [dependencies]
 anyhow = "1.0"
 walkdir = "2"
+
+image = { version = "0.24", optional = true }
+qoi = { version = "0.4", optional = true }

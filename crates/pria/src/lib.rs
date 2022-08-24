@@ -1,4 +1,6 @@
 pub mod handler;
+#[cfg(feature = "image")]
+pub mod image;
 
 use handler::{FileHandler, HandlerCriteria};
 use std::{
