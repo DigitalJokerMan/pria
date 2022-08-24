@@ -1,6 +1,7 @@
 pub mod handler;
 #[cfg(feature = "image")]
 pub mod image;
+pub mod writer;
 
 use handler::{FileHandler, HandlerCriteria};
 use std::{
@@ -9,6 +10,7 @@ use std::{
     path::{Path, PathBuf},
 };
 use walkdir::WalkDir;
+use writer::Writer;
 
 #[derive(Default)]
 pub struct Processor {
@@ -69,7 +71,10 @@ impl Processor {
         }
     }
 
-    pub fn process_folder_recursively(&self, source_path: &Path, destination_path: &Path) {
+    pub fn process_folder_recursively<W>(&self, source_path: &Path, destination: &mut W)
+    where
+        W: Writer,
+    {
         for entry in WalkDir::new(source_path)
             .into_iter()
             .filter_map(|x| x.ok())
@@ -91,7 +96,6 @@ impl Processor {
                     .unwrap();
 
                 let mut path = PathBuf::new();
-                path.push(&destination_path);
                 path.push(
                     &entry
                         .path()
@@ -105,11 +109,9 @@ impl Processor {
                     path.set_extension(preferred_extension);
                 }
 
-                if let Some(parent) = path.parent() {
-                    std::fs::create_dir_all(parent).unwrap();
-                }
-
-                std::fs::write(path, output.bytes).unwrap();
+                destination
+                    .write_file(path.as_path(), output.bytes)
+                    .unwrap();
             }
         }
     }
