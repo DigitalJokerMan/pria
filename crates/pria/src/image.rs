@@ -64,7 +64,7 @@ impl FileHandler for ImageHandler {
             }
             OutputType::QOI => {
                 let qoi_data = qoi::encode_to_vec(
-                    source_image.as_rgba8().unwrap().as_raw(),
+                    source_image.to_rgba8().as_raw(),
                     source_image.width(),
                     source_image.height(),
                 )?;
